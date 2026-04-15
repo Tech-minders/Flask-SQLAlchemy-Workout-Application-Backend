@@ -52,7 +52,6 @@ python seed.py
 
 ## Running the App
 
-Or alternatively:
 ```bash
 python app.py
 ```
