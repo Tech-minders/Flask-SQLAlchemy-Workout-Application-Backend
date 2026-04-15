@@ -4,6 +4,14 @@ from flask import Flask, make_response, request, jsonify
 
 from models import *
 
+from schemas import (
+    exercise_schema,
+    exercises_schema,
+    workout_schema,
+    workouts_schema,
+    workout_exercise_schema,
+)
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
