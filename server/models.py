@@ -36,7 +36,6 @@ class Exercise(db.Model):
     
     @validates("category")
     def validate_category(self, key, value):
-        """Category must be one of the allowed options."""
         allowed = ["strength", "cardio", "flexibility", "balance", "other"]
         if value.lower() not in allowed:
             raise ValueError(f"Category must be one of: {', '.join(allowed)}")
