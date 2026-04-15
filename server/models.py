@@ -27,6 +27,21 @@ class Exercise(db.Model):
         viewonly=True  
     )
 
+     #VALIDATIONS 
+    @validates("name")
+    def validate_name(self, key, value):
+        if not value or not value.strip():
+            raise ValueError("Exercise name cannot be empty.")
+        return value.strip()  
+    
+    @validates("category")
+    def validate_category(self, key, value):
+        """Category must be one of the allowed options."""
+        allowed = ["strength", "cardio", "flexibility", "balance", "other"]
+        if value.lower() not in allowed:
+            raise ValueError(f"Category must be one of: {', '.join(allowed)}")
+        return value.lower()
+
     def __repr__(self):
         return f"<Exercise id={self.id} name='{self.name}' category='{self.category}'>"
 
@@ -52,7 +67,24 @@ class Workout(db.Model):
         secondary="workout_exercises",
         back_populates="workouts",
         viewonly=True
-    )
+
+    ) 
+    
+    # VALIDATIONS 
+ 
+    @validates("duration_minutes")
+    def validate_duration(self, key, value):
+        if value is None or value < 1:
+            raise ValueError("Duration must be at least 1 minute.")
+        return value
+ 
+    @validates("date")
+    def validate_date(self, key, value):
+        if value is None:
+            raise ValueError("Workout date is required.")
+        return value
+
+
 
     def __repr__(self):
         return f"<Workout id={self.id} date='{self.date}' duration={self.duration_minutes}min>"
@@ -73,6 +105,25 @@ class WorkoutExercise(db.Model):
     workout = db.relationship("Workout", back_populates="workout_exercises")
   
     exercise = db.relationship("Exercise", back_populates="workout_exercises")
+
+    # VALIDATIONS
+    @validates("reps")
+    def validate_reps(self, key, value):
+        if value is not None and value < 1:
+            raise ValueError("Reps must be at least 1.")
+        return value
+ 
+    @validates("sets")
+    def validate_sets(self, key, value):
+        if value is not None and value < 1:
+            raise ValueError("Sets must be at least 1.")
+        return value
+ 
+    @validates("duration_seconds")
+    def validate_duration_seconds(self, key, value):
+        if value is not None and value < 1:
+            raise ValueError("Duration in seconds must be at least 1.")
+        return value
 
     
     def __repr__(self):
