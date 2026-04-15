@@ -1,8 +1,10 @@
-from flask import Flask, make_response
+
+from flask import Flask, make_response, request, jsonify
 from flask_migrate import Migrate
-from flask import Flask, request, jsonify
 from marshmallow import ValidationError
-from models import *
+
+# Import the db instance and all models from models.py
+from models import db, Exercise, Workout, WorkoutExercise
 
 from schemas import (
     exercise_schema,
@@ -12,14 +14,20 @@ from schemas import (
     workout_exercise_schema,
 )
 
+
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 
+# This turns off a feature we don't need (saves memory)
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Connect Flask-Migrate so we can run 'flask db migrate' commands
 migrate = Migrate(app, db)
 
+# Connect the SQLAlchemy db to our Flask app
 db.init_app(app)
+
 
 
 def make_json_response(data, status_code=200):
@@ -28,7 +36,7 @@ def make_json_response(data, status_code=200):
     response.headers["Content-Type"] = "application/json"
     return response
 
-# WORKOUT ROUTES
+# WORKOUT ENDPOINTS
 
 @app.route("/workouts", methods=["GET"])
 def get_workouts():
@@ -46,6 +54,7 @@ def get_workout(id):
 
     workout = db.session.get(Workout, id)
 
+    # If no workout was found with that ID, return a 404 error
     if not workout:
         return make_json_response({"error": f"Workout with id {id} not found."}, 404)
 
@@ -168,7 +177,10 @@ def delete_exercise(id):
     return make_json_response({}, 204)
 
 # WORKOUTEXERCISE ENDPOINT
-@app.route("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises",methods=["POST"],)
+@app.route(
+    "/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises",
+    methods=["POST"],
+)
 def add_exercise_to_workout(workout_id, exercise_id):
 
     workout = db.session.get(Workout, workout_id)
@@ -186,7 +198,7 @@ def add_exercise_to_workout(workout_id, exercise_id):
     except ValidationError as err:
         return make_json_response({"errors": err.messages}, 422)
 
-    # Create the join record that links workout to this exercise
+    # Create the join record that links this workout to this exercise
     new_workout_exercise = WorkoutExercise(
         workout_id=workout_id,
         exercise_id=exercise_id,
@@ -205,6 +217,5 @@ def add_exercise_to_workout(workout_id, exercise_id):
 
     return make_json_response(workout_exercise_schema.dump(new_workout_exercise), 201)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(port=5555, debug=True)
