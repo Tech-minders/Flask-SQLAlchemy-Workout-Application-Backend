@@ -1,6 +1,5 @@
-from flask import Flask, make_response
+from flask import Flask, make_response, request, jsonify
 from flask_migrate import Migrate
-from flask import Flask, request, jsonify
 from marshmallow import ValidationError
 from models import *
 
@@ -99,7 +98,7 @@ def delete_workout(id):
         db.session.rollback()
         return make_json_response({"error": str(e)}, 500)
 
-    return make_json_response({}, 204)
+    return make_response('', 204)
 
 # EXERCISE ENDPOINTS
 
@@ -165,7 +164,7 @@ def delete_exercise(id):
         db.session.rollback()
         return make_json_response({"error": str(e)}, 500)
 
-    return make_json_response({}, 204)
+    return make_response('', 204)
 
 # WORKOUTEXERCISE ENDPOINT
 @app.route("/workouts/<int:workout_id>/exercises/<int:exercise_id>/workout_exercises",methods=["POST"],)
